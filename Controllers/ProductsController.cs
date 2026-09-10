@@ -92,7 +92,7 @@ public class ProductsController : ControllerBase
         return Ok(apiResponse); 
     }
 
-        [HttpGet("{id:int}")]
+    [HttpGet("{id:int}")]
     public async Task<IActionResult> GetProductById(int id)
     {
 
