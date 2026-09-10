@@ -1,0 +1,41 @@
+@ProductApi_HostAddress = http://localhost:5201
+
+###
+
+### GET tất cả
+GET {{ProductApi_HostAddress}}/api/products
+
+###
+
+### GET theo ID
+GET {{ProductApi_HostAddress}}/api/products/12
+
+###
+
+### POST
+POST {{ProductApi_HostAddress}}/api/products
+Content-Type: application/json
+
+{
+  "name": "minh",
+  "price": 100
+}
+###
+
+### PUT
+PUT {{ProductApi_HostAddress}}/api/products/12
+Content-Type: application/json
+
+{
+  "name": "Gaming Laptop",
+  "price": 25000000
+}
+###
+
+### DELETE
+DELETE {{ProductApi_HostAddress}}/api/products/12
+
+###
+
+### GET product not found
+GET http://localhost:5201/api/products/999
