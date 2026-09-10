@@ -1,15 +1,16 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Identity;
+using ProductApi.Data;
+using ProductApi.Models;
+using Microsoft.OpenApi;
+using ProductApi.Services;
+using ProductApi.Middleware;
+using ProductApi.Repositories;
 using Microsoft.AspNetCore.Mvc;
+using ProductApi.Configurations;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi;
-using ProductApi.Configurations;
-using ProductApi.Data;
-using ProductApi.Middleware;
-using ProductApi.Models;
-using ProductApi.Repositories;
-using ProductApi.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -84,8 +85,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 
 builder.Services.AddAuthorization();
-
 builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
