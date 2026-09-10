@@ -12,9 +12,10 @@ public class AppDbContext : DbContext
     }
 
     public DbSet<Product> Products { get; set; }
-    public DbSet<User> Users { get; set; }  
+    public DbSet<User> Users { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfiguration(new ProductConfiguration());
+        modelBuilder.ApplyConfiguration(new UserConfiguration());
     }
 }
