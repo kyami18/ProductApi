@@ -5,6 +5,7 @@ using System.Security.Claims;
 using ProductApi.Repositories;
 using ProductApi.Configurations;
 using Microsoft.Extensions.Options;
+using System.Security.Cryptography;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -118,7 +119,7 @@ public class AuthService : IAuthService
             .WriteToken(token);
 
         var refreshToken = Convert.ToBase64String(
-            Guid.NewGuid().ToByteArray());
+            RandomNumberGenerator.GetBytes(32));
 
         user.RefreshToken = refreshToken;
         user.RefreshTokenExpiresAt = DateTime.UtcNow.AddDays(7);
