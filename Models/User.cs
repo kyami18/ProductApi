@@ -9,4 +9,8 @@ public class User
     public string Password { get; set; } = string.Empty;
 
     public string Role { get; set; } = "User";
+
+    public string? RefreshToken { get; set; }
+
+    public DateTime? RefreshTokenExpiresAt { get; set; }
 }

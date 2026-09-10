@@ -95,6 +95,7 @@ public class ProductsController : ControllerBase
         [HttpGet("{id:int}")]
     public async Task<IActionResult> GetProductById(int id)
     {
+
         var product = await productService.GetById(id);
 
         if (product is null)
