@@ -1,36 +1,38 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
-using ProductApi.Configurations;
-using ProductApi.Data;
+﻿using System.Text;
 using ProductApi.DTOs;
 using ProductApi.Models;
-using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Text;
+using ProductApi.Repositories;
+using ProductApi.Configurations;
+using Microsoft.Extensions.Options;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace ProductApi.Services;
+
+
+
 
 public class AuthService : IAuthService
 {
     private readonly AuthSettings authSettings;
-    private readonly AppDbContext db;
+    private readonly IUserRepository userRepository;
     private readonly PasswordHasher<User> passwordHasher;
 
     public AuthService(
         IOptions<AuthSettings> authSettings,
-        AppDbContext db)
+        IUserRepository userRepository)
     {
         this.authSettings = authSettings.Value;
-        this.db = db;
+        this.userRepository = userRepository;
         this.passwordHasher = new PasswordHasher<User>();
     }
 
     public async Task<LoginResponse?> Login(LoginRequest request)
     {
-        var user = await db.Users
-            .FirstOrDefaultAsync(u => u.Username == request.Username);
+        var user = await userRepository.GetByUsername(
+            request.Username);
 
         if (user is null)
         {
@@ -53,8 +55,8 @@ public class AuthService : IAuthService
 
     public async Task<LoginResponse?> Refresh(string refreshToken)
     {
-        var user = await db.Users
-            .FirstOrDefaultAsync(u => u.RefreshToken == refreshToken);
+        var user = await userRepository.GetByRefreshToken(
+            refreshToken);
 
         if (user is null)
         {
@@ -71,8 +73,8 @@ public class AuthService : IAuthService
 
     public async Task<bool> Logout(string refreshToken)
     {
-        var user = await db.Users
-            .FirstOrDefaultAsync(u => u.RefreshToken == refreshToken);
+        var user = await userRepository.GetByRefreshToken(
+            refreshToken);
 
         if (user is null)
         {
@@ -82,7 +84,7 @@ public class AuthService : IAuthService
         user.RefreshToken = null;
         user.RefreshTokenExpiresAt = null;
 
-        await db.SaveChangesAsync();
+        await userRepository.SaveChanges();
 
         return true;
     }
@@ -121,7 +123,7 @@ public class AuthService : IAuthService
         user.RefreshToken = refreshToken;
         user.RefreshTokenExpiresAt = DateTime.UtcNow.AddDays(7);
 
-        await db.SaveChangesAsync();
+        await userRepository.SaveChanges();
 
         return new LoginResponse
         {
