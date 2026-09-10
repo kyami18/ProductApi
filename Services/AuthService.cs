@@ -20,14 +20,17 @@ public class AuthService : IAuthService
     private readonly AuthSettings authSettings;
     private readonly IUserRepository userRepository;
     private readonly PasswordHasher<User> passwordHasher;
+    private readonly ILogger<AuthService> logger;
 
     public AuthService(
-        IOptions<AuthSettings> authSettings,
-        IUserRepository userRepository)
+     IOptions<AuthSettings> authSettings,
+     IUserRepository userRepository,
+     ILogger<AuthService> logger)
     {
         this.authSettings = authSettings.Value;
         this.userRepository = userRepository;
         this.passwordHasher = new PasswordHasher<User>();
+        this.logger = logger;
     }
 
     public async Task<LoginResponse?> Login(LoginRequest request)
@@ -48,6 +51,10 @@ public class AuthService : IAuthService
 
         if (passwordResult == PasswordVerificationResult.Failed)
         {
+            logger.LogWarning(
+                "Login failed for username {Username}: invalid password",
+                request.Username);
+
             return null;
         }
 
@@ -61,6 +68,9 @@ public class AuthService : IAuthService
 
         if (user is null)
         {
+            logger.LogWarning(
+                "Refresh token invalid or user not found");
+
             return null;
         }
 
