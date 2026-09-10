@@ -121,9 +121,12 @@ using (var scope = app.Services.CreateScope())
 
         db.SaveChanges();
     }
+
     var passwordHasher = new PasswordHasher<User>();
 
-    if (!db.Users.Any())
+    var users = db.Users.ToList();
+
+    if (!users.Any())
     {
         var admin = new User
         {
@@ -132,10 +135,7 @@ using (var scope = app.Services.CreateScope())
             Role = "Admin"
         };
 
-        admin.Password = passwordHasher.HashPassword(
-            admin,
-            "123456"
-        );
+        admin.Password = passwordHasher.HashPassword(admin, "123456");
 
         var user = new User
         {
@@ -144,19 +144,12 @@ using (var scope = app.Services.CreateScope())
             Role = "User"
         };
 
-        user.Password = passwordHasher.HashPassword(
-            user,
-            "123456"
-        );
+        user.Password = passwordHasher.HashPassword(user, "123456");
 
         db.Users.AddRange(admin, user);
-
-        db.SaveChanges();
     }
     else
     {
-        var users = db.Users.ToList();
-
         foreach (var user in users)
         {
             if (user.Password == "123456")
@@ -167,9 +160,9 @@ using (var scope = app.Services.CreateScope())
                 );
             }
         }
-
-        db.SaveChanges();
     }
+
+    db.SaveChanges();
 }
 
 if (app.Environment.IsDevelopment())
