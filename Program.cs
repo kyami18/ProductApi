@@ -2,6 +2,7 @@ using ProductApi.Data;
 using ProductApi.Models;
 using Microsoft.OpenApi;
 using ProductApi.Services;
+using ProductApi.Extensions;
 using ProductApi.Middleware;
 using ProductApi.Repositories;
 using Microsoft.AspNetCore.Mvc;
@@ -57,38 +58,10 @@ builder.Services.AddControllers()
             );
         };
     });
-builder.Services.Configure<ProductSettings>(
-    builder.Configuration.GetSection("ProductSettings"));
-builder.Services.Configure<AuthSettings>(
-    builder.Configuration.GetSection("AuthSettings"));
-var authSettings = builder.Configuration
-    .GetSection("AuthSettings")
-    .Get<AuthSettings>();
-
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
-
-            ValidIssuer = authSettings!.Issuer,
-            ValidAudience = authSettings.Audience,
-
-            IssuerSigningKey = new SymmetricSecurityKey(
-                System.Text.Encoding.UTF8.GetBytes(
-                    authSettings.SecretKey))
-        };
-    });
-
-builder.Services.AddAuthorization();
-builder.Services.AddScoped<IProductService, ProductService>();
-builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddApplicationConfiguration(
+    builder.Configuration);
+builder.Services.AddJwtAuthentication(builder.Configuration);
+builder.Services.AddApplicationServices();
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -176,8 +149,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.UseMiddleware<ExceptionHandlingMiddleware>();
-app.UseMiddleware<RequestLoggingMiddleware>();
+app.UseApplicationMiddleware();
 
 app.UseAuthentication();
 app.UseAuthorization();
