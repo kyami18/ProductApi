@@ -1,6 +1,7 @@
 ﻿using ProductApi.DTOs;
 using ProductApi.Models;
 using ProductApi.Repositories;
+using ProductApi.Extensions.Mappings;
 
 namespace ProductApi.Services;
 
@@ -44,11 +45,7 @@ public class ProductService : IProductService
 
     public async Task<Product> Create(CreateProductRequest request)
     {
-        var product = new Product
-        {
-            Name = request.Name,
-            Price = request.Price
-        };
+        var product = request.ToProduct();
 
         await productRepository.Add(product);
         await unitOfWork.SaveChanges();
@@ -65,8 +62,7 @@ public class ProductService : IProductService
         if (product is null)
             return null;
 
-        product.Name = request.Name;
-        product.Price = request.Price;
+        request.ToProduct(product);
 
         await productRepository.Update(product);
         await unitOfWork.SaveChanges();

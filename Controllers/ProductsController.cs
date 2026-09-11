@@ -5,6 +5,7 @@ using ProductApi.Models;
 using ProductApi.Services;
 using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Authorization;
+using ProductApi.Extensions.Mappings;
 
 
 namespace ProductApi.Controllers;
@@ -67,12 +68,9 @@ public class ProductsController : ControllerBase
         }
         var pagination = new PaginationResponse<ProductResponse>
         {
-            Data = products.Select(product => new ProductResponse
-            {
-                Id = product.Id,
-                Name = product.Name,
-                Price = product.Price
-            }).ToList(),
+            Data = products
+            .Select(product => product.ToResponse())
+            .ToList(),
 
             Page = page,
             PageSize = currentPageSize,
@@ -108,13 +106,7 @@ public class ProductsController : ControllerBase
             });
         }
 
-        var response = new ProductResponse
-        {
-            Id = product.Id,
-            Name = product.Name,
-            Price = product.Price
-        };
-
+        var response = product.ToResponse();
         var apiResponse = new ApiResponse<ProductResponse>
         {
             Success = true,
@@ -132,12 +124,7 @@ public class ProductsController : ControllerBase
     {
         var product = await productService.Create(request);
 
-        var response = new ProductResponse
-        {
-            Id = product.Id,
-            Name = product.Name,
-            Price = product.Price
-        };
+        var response = product.ToResponse();
 
         var apiResponse = new ApiResponse<ProductResponse>
         {
@@ -170,12 +157,7 @@ public class ProductsController : ControllerBase
             });
         }
 
-        var response = new ProductResponse
-        {
-            Id = product.Id,
-            Name = product.Name,
-            Price = product.Price
-        };
+        var response = product.ToResponse();
 
         var apiResponse = new ApiResponse<ProductResponse>
         {
