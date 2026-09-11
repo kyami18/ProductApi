@@ -1,16 +1,11 @@
-using ProductApi.Data;
-using ProductApi.Models;
-using Microsoft.OpenApi;
-using ProductApi.Services;
-using ProductApi.Extensions;
-using ProductApi.Middleware;
-using ProductApi.Repositories;
-using Microsoft.AspNetCore.Mvc;
-using ProductApi.Configurations;
+using FluentValidation;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.OpenApi;
+using ProductApi.Data;
+using ProductApi.Extensions;
+using ProductApi.Models;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -58,6 +53,7 @@ builder.Services.AddControllers()
             );
         };
     });
+
 builder.Services.AddApplicationConfiguration(
     builder.Configuration);
 builder.Services.AddJwtAuthentication(builder.Configuration);

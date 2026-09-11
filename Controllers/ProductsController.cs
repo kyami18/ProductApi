@@ -1,12 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using ProductApi.Configurations;
 using ProductApi.DTOs;
-using ProductApi.Models;
 using ProductApi.Services;
 using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Authorization;
 using ProductApi.Extensions.Mappings;
-
+using FluentValidation;
+using ProductApi.Extensions;
 
 namespace ProductApi.Controllers;
 
@@ -17,13 +17,18 @@ public class ProductsController : ControllerBase
 {
     private readonly IProductService productService;
     private readonly ProductSettings productSettings;
-
+    private readonly IValidator<CreateProductRequest> createProductValidator;
+    private readonly IValidator<UpdateProductRequest> updateProductValidator;
     public ProductsController(
-     IProductService productService,
-     IOptions<ProductSettings> productSettings)
+    IProductService productService,
+    IOptions<ProductSettings> productSettings,
+    IValidator<CreateProductRequest> createProductValidator,
+    IValidator<UpdateProductRequest> updateProductValidator)
     {
         this.productService = productService;
         this.productSettings = productSettings.Value;
+        this.createProductValidator = createProductValidator;
+        this.updateProductValidator = updateProductValidator;
     }
 
     [HttpGet]
@@ -121,7 +126,14 @@ public class ProductsController : ControllerBase
 
     [HttpPost]
     public async Task<IActionResult> CreateProduct(CreateProductRequest request)
+
     {
+        var validationResult = await createProductValidator.ValidateAsync(request);
+
+        if (!validationResult.IsValid)
+        {
+            return BadRequest(validationResult.ToApiResponse());
+        }
         var product = await productService.Create(request);
 
         var response = product.ToResponse();
@@ -142,9 +154,17 @@ public class ProductsController : ControllerBase
     [Authorize(Roles = "Admin")]
     [HttpPut("{id:int}")]
     public async Task<IActionResult> UpdateProduct(
-        int id,
-        [FromBody] UpdateProductRequest request)
+    int id,
+    [FromBody] UpdateProductRequest request)
     {
+        var validationResult =
+            await updateProductValidator.ValidateAsync(request);
+
+        if (!validationResult.IsValid)
+        {
+            return BadRequest(validationResult.ToApiResponse());
+        }
+
         var product = await productService.Update(id, request);
 
         if (product is null)

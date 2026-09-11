@@ -1,5 +1,7 @@
-﻿using ProductApi.Repositories;
+﻿using FluentValidation;
+using ProductApi.Repositories;
 using ProductApi.Services;
+using ProductApi.Validators;
 
 namespace ProductApi.Extensions;
 
@@ -14,5 +16,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+        services.AddValidatorsFromAssemblyContaining<
+            CreateProductRequestValidator>();
     }
 }
