@@ -1,34 +1,34 @@
-﻿using System.Text;
+﻿using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Text;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
+using ProductApi.Configurations;
 using ProductApi.DTOs;
 using ProductApi.Models;
-using System.Security.Claims;
 using ProductApi.Repositories;
-using ProductApi.Configurations;
-using Microsoft.Extensions.Options;
-using System.Security.Cryptography;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
 
 namespace ProductApi.Services;
-
-
-
 
 public class AuthService : IAuthService
 {
     private readonly AuthSettings authSettings;
     private readonly IUserRepository userRepository;
+    private readonly IUnitOfWork unitOfWork;
     private readonly PasswordHasher<User> passwordHasher;
     private readonly ILogger<AuthService> logger;
 
     public AuthService(
-     IOptions<AuthSettings> authSettings,
-     IUserRepository userRepository,
-     ILogger<AuthService> logger)
+        IOptions<AuthSettings> authSettings,
+        IUserRepository userRepository,
+        IUnitOfWork unitOfWork,
+        ILogger<AuthService> logger)
     {
         this.authSettings = authSettings.Value;
         this.userRepository = userRepository;
+        this.unitOfWork = unitOfWork;
         this.passwordHasher = new PasswordHasher<User>();
         this.logger = logger;
     }
@@ -95,7 +95,7 @@ public class AuthService : IAuthService
         user.RefreshToken = null;
         user.RefreshTokenExpiresAt = null;
 
-        await userRepository.SaveChanges();
+        await unitOfWork.SaveChanges();
 
         return true;
     }
@@ -134,7 +134,7 @@ public class AuthService : IAuthService
         user.RefreshToken = refreshToken;
         user.RefreshTokenExpiresAt = DateTime.UtcNow.AddDays(7);
 
-        await userRepository.SaveChanges();
+        await unitOfWork.SaveChanges();
 
         return new LoginResponse
         {

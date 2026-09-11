@@ -8,5 +8,4 @@ public interface IUserRepository
 
     Task<User?> GetByRefreshToken(string refreshToken);
 
-    Task SaveChanges();
 }

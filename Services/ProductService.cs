@@ -1,18 +1,22 @@
-﻿using Microsoft.EntityFrameworkCore;
-using ProductApi.DTOs;
+﻿using ProductApi.DTOs;
 using ProductApi.Models;
 using ProductApi.Repositories;
-using System.Xml.Linq;
+
 namespace ProductApi.Services;
 
 public class ProductService : IProductService
 {
     private readonly IProductRepository productRepository;
+    private readonly IUnitOfWork unitOfWork;
 
-    public ProductService(IProductRepository productRepository)
+    public ProductService(
+        IProductRepository productRepository,
+        IUnitOfWork unitOfWork)
     {
         this.productRepository = productRepository;
+        this.unitOfWork = unitOfWork;
     }
+
     public async Task<List<Product>> GetAll(
         string? name,
         int page,
@@ -27,6 +31,7 @@ public class ProductService : IProductService
             sortBy,
             sortOrder);
     }
+
     public async Task<int> Count(string? name)
     {
         return await productRepository.Count(name);
@@ -36,16 +41,9 @@ public class ProductService : IProductService
     {
         return await productRepository.GetById(id);
     }
+
     public async Task<Product> Create(CreateProductRequest request)
     {
-        int newId = 1;
-
-        var products = await productRepository.GetAll(null, 1, int.MaxValue,null,null);
-        if (products.Any())
-        {
-            newId = products.Max(p => p.Id) + 1;
-        }
-
         var product = new Product
         {
             Name = request.Name,
@@ -53,10 +51,14 @@ public class ProductService : IProductService
         };
 
         await productRepository.Add(product);
+        await unitOfWork.SaveChanges();
 
         return product;
     }
-    public async Task<Product?> Update(int id, UpdateProductRequest request)
+
+    public async Task<Product?> Update(
+        int id,
+        UpdateProductRequest request)
     {
         var product = await productRepository.GetById(id);
 
@@ -67,9 +69,11 @@ public class ProductService : IProductService
         product.Price = request.Price;
 
         await productRepository.Update(product);
+        await unitOfWork.SaveChanges();
 
         return product;
     }
+
     public async Task<bool> Delete(int id)
     {
         var product = await productRepository.GetById(id);
@@ -78,6 +82,7 @@ public class ProductService : IProductService
             return false;
 
         await productRepository.Delete(product);
+        await unitOfWork.SaveChanges();
 
         return true;
     }

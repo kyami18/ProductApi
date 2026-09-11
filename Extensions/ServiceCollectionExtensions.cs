@@ -13,5 +13,6 @@ public static class ServiceCollectionExtensions
 
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
     }
 }

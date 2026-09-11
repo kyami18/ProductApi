@@ -24,9 +24,4 @@ public class UserRepository : IUserRepository
         return await db.Users
             .FirstOrDefaultAsync(u => u.RefreshToken == refreshToken);
     }
-
-    public async Task SaveChanges()
-    {
-        await db.SaveChangesAsync();
-    }
 }

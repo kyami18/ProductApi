@@ -7,7 +7,6 @@ namespace ProductApi.Repositories;
 public class ProductRepository : IProductRepository
 {
     private readonly AppDbContext db;
-
     public ProductRepository(AppDbContext db)
     {
         this.db = db;
@@ -64,7 +63,6 @@ public class ProductRepository : IProductRepository
 
         return await query.ToListAsync();
     }
-   
 
     public async Task<int> Count(string? name)
     {
@@ -77,26 +75,25 @@ public class ProductRepository : IProductRepository
 
         return await query.CountAsync();
     }
+
     public async Task<Product?> GetById(int id)
     {
-        return await db.Products.FirstOrDefaultAsync(p => p.Id == id);
+        return await db.Products
+            .FirstOrDefaultAsync(p => p.Id == id);
     }
 
     public async Task Add(Product product)
     {
         db.Products.Add(product);
-        await db.SaveChangesAsync();
     }
 
     public async Task Update(Product product)
     {
         db.Products.Update(product);
-        await db.SaveChangesAsync();
     }
 
     public async Task Delete(Product product)
     {
         db.Products.Remove(product);
-        await db.SaveChangesAsync();
     }
 }

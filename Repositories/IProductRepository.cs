@@ -10,7 +10,9 @@ public interface IProductRepository
         int pageSize,
         string? sortBy,
         string? sortOrder);
+
     Task<int> Count(string? name);
+
     Task<Product?> GetById(int id);
 
     Task Add(Product product);
