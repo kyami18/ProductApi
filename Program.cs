@@ -1,4 +1,3 @@
-using FluentValidation;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -6,7 +5,7 @@ using Microsoft.OpenApi;
 using ProductApi.Data;
 using ProductApi.Extensions;
 using ProductApi.Models;
-
+using ProductApi.Filters;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,30 +28,33 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
-builder.Services.AddControllers()
-    .ConfigureApiBehaviorOptions(options =>
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add<ValidationFilter>();
+})
+.ConfigureApiBehaviorOptions(options =>
+{
+    options.InvalidModelStateResponseFactory = context =>
     {
-        options.InvalidModelStateResponseFactory = context =>
-        {
-            var errors = context.ModelState
-                .Where(x => x.Value?.Errors.Count > 0)
-                .ToDictionary(
-                    x => x.Key,
-                    x => x.Value!.Errors
-                        .Select(e => e.ErrorMessage)
-                        .ToArray()
-                );
-
-            return new BadRequestObjectResult(
-                new ProductApi.DTOs.ApiResponse<object>
-                {
-                    Success = false,
-                    Message = "Dữ liệu không hợp lệ",
-                    Data = errors
-                }
+        var errors = context.ModelState
+            .Where(x => x.Value?.Errors.Count > 0)
+            .ToDictionary(
+                x => x.Key,
+                x => x.Value!.Errors
+                    .Select(e => e.ErrorMessage)
+                    .ToArray()
             );
-        };
-    });
+
+        return new BadRequestObjectResult(
+            new ProductApi.DTOs.ApiResponse<object>
+            {
+                Success = false,
+                Message = "Dữ liệu không hợp lệ",
+                Data = errors
+            }
+        );
+    };
+});
 
 builder.Services.AddApplicationConfiguration(
     builder.Configuration);
