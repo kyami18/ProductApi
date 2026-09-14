@@ -4,8 +4,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
 using ProductApi.Data;
 using ProductApi.Extensions;
-using ProductApi.Models;
 using ProductApi.Filters;
+using ProductApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
