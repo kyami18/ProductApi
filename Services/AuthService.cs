@@ -131,7 +131,7 @@ public class AuthService : IAuthService
         var refreshToken = Convert.ToBase64String(
             RandomNumberGenerator.GetBytes(32));
 
-        user.RefreshToken = refreshToken;
+        user.RefreshToken = RefreshTokenHasher.Hash(refreshToken);
         user.RefreshTokenExpiresAt = DateTime.UtcNow.AddDays(7);
 
         await unitOfWork.SaveChanges();
