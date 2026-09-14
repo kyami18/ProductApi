@@ -190,7 +190,12 @@ public class ProductsController : ControllerBase
 
         return NoContent();
     }
-
+    [AllowAnonymous]
+    [HttpGet("test-error")]
+    public IActionResult TestError()
+    {
+        throw new Exception("Test exception");
+    }
 
 
 }

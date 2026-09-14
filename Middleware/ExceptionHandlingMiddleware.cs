@@ -36,7 +36,10 @@ public class ExceptionHandlingMiddleware
             {
                 Success = false,
                 Message = "Đã xảy ra lỗi phía máy chủ.",
-                Data = null
+                Data = new
+                {
+                    traceId = context.TraceIdentifier
+                }
             };
 
             await context.Response.WriteAsJsonAsync(response);
