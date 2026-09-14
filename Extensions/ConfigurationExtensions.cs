@@ -10,5 +10,11 @@ public static class ConfigurationExtensions
     {
         services.Configure<ProductSettings>(
             configuration.GetSection("ProductSettings"));
+
+        services.Configure<AuthSettings>(
+            configuration.GetSection("AuthSettings"));
+
+        services.Configure<CorsSettings>(
+            configuration.GetSection("CorsSettings"));
     }
 }

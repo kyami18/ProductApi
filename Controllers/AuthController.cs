@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using ProductApi.DTOs;
 using ProductApi.Services;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace ProductApi.Controllers;
 
@@ -17,22 +18,33 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("login")]
+    [EnableRateLimiting("AuthPolicy")]
+
     public async Task<IActionResult> Login(LoginRequest request)
     {
         var result = await authService.Login(request);
 
         if (result is null)
         {
-            return Unauthorized(new
+            return Unauthorized(new ApiResponse<object>
             {
-                message = "Username hoặc password không đúng"
+                Success = false,
+                Message = "Username hoặc password không đúng",
+                Data = null
             });
         }
 
-        return Ok(result);
+        return Ok(new ApiResponse<LoginResponse>
+        {
+            Success = true,
+            Message = "Đăng nhập thành công",
+            Data = result
+        });
     }
 
     [HttpPost("refresh")]
+    [EnableRateLimiting("AuthPolicy")]
+
     public async Task<IActionResult> Refresh(
         RefreshTokenRequest request)
     {
@@ -41,13 +53,20 @@ public class AuthController : ControllerBase
 
         if (result is null)
         {
-            return Unauthorized(new
+            return Unauthorized(new ApiResponse<object>
             {
-                message = "Refresh Token không hợp lệ hoặc đã hết hạn"
+                Success = false,
+                Message = "Refresh Token không hợp lệ hoặc đã hết hạn",
+                Data = null
             });
         }
 
-        return Ok(result);
+        return Ok(new ApiResponse<LoginResponse>
+        {
+            Success = true,
+            Message = "Làm mới token thành công",
+            Data = result
+        });
     }
 
     [HttpPost("logout")]
@@ -59,15 +78,19 @@ public class AuthController : ControllerBase
 
         if (!result)
         {
-            return Unauthorized(new
+            return Unauthorized(new ApiResponse<object>
             {
-                message = "Refresh Token không hợp lệ"
+                Success = false,
+                Message = "Refresh Token không hợp lệ",
+                Data = null
             });
         }
 
-        return Ok(new
+        return Ok(new ApiResponse<object>
         {
-            message = "Đăng xuất thành công"
+            Success = true,
+            Message = "Đăng xuất thành công",
+            Data = null
         });
     }
 

@@ -2,13 +2,58 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
+using ProductApi.Configurations;
 using ProductApi.Data;
 using ProductApi.Extensions;
 using ProductApi.Filters;
 using ProductApi.Models;
+using System.Threading.RateLimiting;
+using Microsoft.AspNetCore.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
+
+var corsSettings = builder.Configuration
+    .GetSection("CorsSettings")
+    .Get<CorsSettings>();
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("Frontend", policy =>
+    {
+        policy
+            .WithOrigins(corsSettings!.AllowedOrigins)
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
+builder.Services.AddRateLimiter(options =>
+{
+    options.OnRejected = async (context, cancellationToken) =>
+    {
+        context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
+        context.HttpContext.Response.ContentType = "application/json";
+
+        var response = new ProductApi.DTOs.ApiResponse<object>
+        {
+            Success = false,
+            Message = "Bạn đã gửi quá nhiều yêu cầu. Vui lòng thử lại sau.",
+            Data = null
+        };
+
+        await context.HttpContext.Response.WriteAsJsonAsync(
+            response,
+            cancellationToken);
+    };
+
+    options.AddFixedWindowLimiter("AuthPolicy", limiterOptions =>
+    {
+        limiterOptions.PermitLimit = 5;
+        limiterOptions.Window = TimeSpan.FromMinutes(1);
+        limiterOptions.QueueLimit = 0;
+        limiterOptions.AutoReplenishment = true;
+    });
+});
 builder.Services.AddOpenApi();
 builder.Services.AddSwaggerGen(options =>
 {
@@ -147,6 +192,10 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors("Frontend");
+
+app.UseRateLimiter();
 
 app.UseApplicationMiddleware();
 
