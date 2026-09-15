@@ -9,6 +9,9 @@ using ProductApi.Extensions;
 
 namespace ProductApi.Controllers;
 
+/// <summary>
+/// Quản lý các API liên quan đến sản phẩm.
+/// </summary>
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]
@@ -25,6 +28,15 @@ public class ProductsController : ControllerBase
         this.productSettings = productSettings.Value;
     }
 
+    /// <summary>
+    /// Lấy danh sách sản phẩm có hỗ trợ tìm kiếm, phân trang và sắp xếp.
+    /// </summary>
+    /// <param name="name">Tên sản phẩm cần tìm kiếm.</param>
+    /// <param name="page">Số trang, bắt đầu từ 1.</param>
+    /// <param name="pageSize">Số sản phẩm trên mỗi trang.</param>
+    /// <param name="sortBy">Trường dùng để sắp xếp: id, name hoặc price.</param>
+    /// <param name="sortOrder">Thứ tự sắp xếp: asc hoặc desc.</param>
+    /// <returns>Danh sách sản phẩm kèm thông tin phân trang.</returns>
     [HttpGet]
     public async Task<IActionResult> GetProducts(
     string? name,
@@ -88,7 +100,11 @@ public class ProductsController : ControllerBase
 
         return Ok(apiResponse); 
     }
-
+    /// <summary>
+    /// Lấy thông tin một sản phẩm theo ID.
+    /// </summary>
+    /// <param name="id">ID của sản phẩm.</param>
+    /// <returns>Thông tin sản phẩm nếu tìm thấy.</returns>
     [HttpGet("{id:int}")]
     public async Task<IActionResult> GetProductById(int id)
     {
@@ -115,9 +131,12 @@ public class ProductsController : ControllerBase
 
         return Ok(apiResponse);
     }
-
+    /// <summary>
+    /// Tạo một sản phẩm mới.
+    /// </summary>
+    /// <param name="request">Thông tin sản phẩm cần tạo.</param>
+    /// <returns>Sản phẩm vừa được tạo.</returns>
     [Authorize(Roles = "Admin")]
-
     [HttpPost]
     public async Task<IActionResult> CreateProduct(CreateProductRequest request)
 
@@ -140,6 +159,12 @@ public class ProductsController : ControllerBase
             apiResponse
         );
     }
+    /// <summary>
+    /// Cập nhật thông tin một sản phẩm.
+    /// </summary>
+    /// <param name="id">ID của sản phẩm cần cập nhật.</param>
+    /// <param name="request">Thông tin mới của sản phẩm.</param>
+    /// <returns>Sản phẩm sau khi cập nhật.</returns>
     [Authorize(Roles = "Admin")]
     [HttpPut("{id:int}")]
     public async Task<IActionResult> UpdateProduct(
@@ -171,7 +196,11 @@ public class ProductsController : ControllerBase
 
         return Ok(apiResponse);
     }
-
+    /// <summary>
+    /// Xóa một sản phẩm.
+    /// </summary>
+    /// <param name="id">ID của sản phẩm cần xóa.</param>
+    /// <returns>Không có nội dung nếu xóa thành công.</returns>
     [Authorize(Roles = "Admin")]
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteProduct(int id)

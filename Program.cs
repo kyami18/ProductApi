@@ -55,6 +55,12 @@ builder.Services.AddRateLimiter(options =>
 builder.Services.AddOpenApi();
 builder.Services.AddSwaggerGen(options =>
 {
+    var xmlFile = $"{typeof(Program).Assembly.GetName().Name}.xml";
+    var xmlPath = Path.Combine(
+        AppContext.BaseDirectory,
+        xmlFile);
+
+    options.IncludeXmlComments(xmlPath);
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Name = "Authorization",
