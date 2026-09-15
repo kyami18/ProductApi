@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
@@ -6,8 +5,6 @@ using ProductApi.Configurations;
 using ProductApi.Data;
 using ProductApi.Extensions;
 using ProductApi.Filters;
-using ProductApi.Models;
-using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -110,78 +107,14 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite(connectionString));
 var app = builder.Build();
-using (var scope = app.Services.CreateScope())
+if (app.Environment.IsDevelopment())
 {
-    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    db.Database.Migrate();
+    using var scope = app.Services.CreateScope();
 
-    if (!db.Products.Any())
-    {
-        db.Products.AddRange(
-           new Product
-           {
-               Id = 1,
-               Name = "Laptop",
-               Price = 20000000
-           },
-           new Product
-           {
-               Id = 2,
-               Name = "Mouse",
-               Price = 500000
-           },
-           new Product
-           {
-               Id = 3,
-               Name = "Keyboard",
-               Price = 1000000
-           }                                              
-         );
+    var db = scope.ServiceProvider
+        .GetRequiredService<AppDbContext>();
 
-        db.SaveChanges();
-    }
-
-    var passwordHasher = new PasswordHasher<User>();
-
-    var users = db.Users.ToList();
-
-    if (!users.Any())
-    {
-        var admin = new User
-        {
-            Id = 1,
-            Username = "admin",
-            Role = "Admin"
-        };
-
-        admin.Password = passwordHasher.HashPassword(admin, "123456");
-
-        var user = new User
-        {
-            Id = 2,
-            Username = "user",
-            Role = "User"
-        };
-
-        user.Password = passwordHasher.HashPassword(user, "123456");
-
-        db.Users.AddRange(admin, user);
-    }
-    else
-    {
-        foreach (var user in users)
-        {
-            if (user.Password == "123456")
-            {
-                user.Password = passwordHasher.HashPassword(
-                    user,
-                    "123456"
-                );
-            }
-        }
-    }
-
-    db.SaveChanges();
+    DbInitializer.Initialize(db);
 }
 
 if (app.Environment.IsDevelopment())
