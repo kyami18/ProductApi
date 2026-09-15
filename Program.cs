@@ -13,6 +13,7 @@ var builder = WebApplication.CreateBuilder(args);
 var corsSettings = builder.Configuration
     .GetSection("CorsSettings")
     .Get<CorsSettings>();
+builder.Services.AddHealthChecks();
 
 builder.Services.AddCors(options =>
 {
@@ -136,4 +137,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHealthChecks("/health");
+
 app.Run();
